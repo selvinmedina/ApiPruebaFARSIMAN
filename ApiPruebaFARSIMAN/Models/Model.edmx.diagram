@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="2f4ac4e7c9334e07b9c82061de953962" Name="Diagram1">
+        <EntityTypeShape EntityType="PruebaFARSIMANModel.tbColaboradores" Width="1.5" PointX="3" PointY="1.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="PruebaFARSIMANModel.tbPrecioKilometro" Width="1.5" PointX="5.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="PruebaFARSIMANModel.tbSucursales" Width="1.5" PointX="3" PointY="4.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="PruebaFARSIMANModel.tbTransportistas" Width="1.5" PointX="3" PointY="7.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="PruebaFARSIMANModel.tbUsuarios" Width="1.5" PointX="0.75" PointY="4.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="PruebaFARSIMANModel.tbViajesColaborador" Width="1.5" PointX="5.25" PointY="4.125" IsExpanded="true" />
+        <AssociationConnector Association="PruebaFARSIMANModel.FK_tbColaboradores_tbViajesColaborador_col_Id" ManuallyRouted="false" />
+        <AssociationConnector Association="PruebaFARSIMANModel.FK_tbUsuarios_tbColaboradores_col_UsuarioCrea" ManuallyRouted="false" />
+        <AssociationConnector Association="PruebaFARSIMANModel.FK_tbUsuarios_tbSucursales_suc_UsuarioCrea" ManuallyRouted="false" />
+        <AssociationConnector Association="PruebaFARSIMANModel.FK_tbTransportistas_tbViajesColaborador_trans_Id" ManuallyRouted="false" />
+        <AssociationConnector Association="PruebaFARSIMANModel.FK_tbUsuarios_tbTransportistas_trans_UsuarioCrea" ManuallyRouted="false" />
+        <AssociationConnector Association="PruebaFARSIMANModel.FK_tbUsuarios_tbViajesColaborador_viaj_UsuarioCrea" ManuallyRouted="false" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>
