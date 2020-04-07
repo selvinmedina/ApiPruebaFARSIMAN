@@ -27,33 +27,12 @@ namespace ApiPruebaFARSIMAN.Models
             throw new UnintentionalCodeFirstException();
         }
     
-        public virtual DbSet<tbColaboradores> tbColaboradores { get; set; }
         public virtual DbSet<tbPrecioKilometro> tbPrecioKilometro { get; set; }
         public virtual DbSet<tbSucursales> tbSucursales { get; set; }
         public virtual DbSet<tbTransportistas> tbTransportistas { get; set; }
-        public virtual DbSet<tbUsuarios> tbUsuarios { get; set; }
         public virtual DbSet<tbViajesColaborador> tbViajesColaborador { get; set; }
-    
-        public virtual ObjectResult<Reporte_Result> Reporte(Nullable<System.DateTime> fecha1, Nullable<System.DateTime> fecha2, Nullable<decimal> precioKilometro, Nullable<int> transportista)
-        {
-            var fecha1Parameter = fecha1.HasValue ?
-                new ObjectParameter("fecha1", fecha1) :
-                new ObjectParameter("fecha1", typeof(System.DateTime));
-    
-            var fecha2Parameter = fecha2.HasValue ?
-                new ObjectParameter("fecha2", fecha2) :
-                new ObjectParameter("fecha2", typeof(System.DateTime));
-    
-            var precioKilometroParameter = precioKilometro.HasValue ?
-                new ObjectParameter("precioKilometro", precioKilometro) :
-                new ObjectParameter("precioKilometro", typeof(decimal));
-    
-            var transportistaParameter = transportista.HasValue ?
-                new ObjectParameter("transportista", transportista) :
-                new ObjectParameter("transportista", typeof(int));
-    
-            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<Reporte_Result>("Reporte", fecha1Parameter, fecha2Parameter, precioKilometroParameter, transportistaParameter);
-        }
+        public virtual DbSet<tbColaboradores> tbColaboradores { get; set; }
+        public virtual DbSet<tbUsuarios> tbUsuarios { get; set; }
     
         public virtual ObjectResult<Login_Result> Login(string usuario, string password)
         {
@@ -66,6 +45,44 @@ namespace ApiPruebaFARSIMAN.Models
                 new ObjectParameter("password", typeof(string));
     
             return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<Login_Result>("Login", usuarioParameter, passwordParameter);
+        }
+    
+        public virtual ObjectResult<tbViajesColaborador_Insert_Result> tbViajesColaborador_Insert(Nullable<int> trans_Id, Nullable<int> col_Id, Nullable<System.DateTime> fecha, Nullable<int> viaj_UsuarioCrea)
+        {
+            var trans_IdParameter = trans_Id.HasValue ?
+                new ObjectParameter("trans_Id", trans_Id) :
+                new ObjectParameter("trans_Id", typeof(int));
+    
+            var col_IdParameter = col_Id.HasValue ?
+                new ObjectParameter("col_Id", col_Id) :
+                new ObjectParameter("col_Id", typeof(int));
+    
+            var fechaParameter = fecha.HasValue ?
+                new ObjectParameter("fecha", fecha) :
+                new ObjectParameter("fecha", typeof(System.DateTime));
+    
+            var viaj_UsuarioCreaParameter = viaj_UsuarioCrea.HasValue ?
+                new ObjectParameter("viaj_UsuarioCrea", viaj_UsuarioCrea) :
+                new ObjectParameter("viaj_UsuarioCrea", typeof(int));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<tbViajesColaborador_Insert_Result>("tbViajesColaborador_Insert", trans_IdParameter, col_IdParameter, fechaParameter, viaj_UsuarioCreaParameter);
+        }
+    
+        public virtual ObjectResult<string> Reporte(Nullable<System.DateTime> fecha1, Nullable<System.DateTime> fecha2, Nullable<int> transportista)
+        {
+            var fecha1Parameter = fecha1.HasValue ?
+                new ObjectParameter("fecha1", fecha1) :
+                new ObjectParameter("fecha1", typeof(System.DateTime));
+    
+            var fecha2Parameter = fecha2.HasValue ?
+                new ObjectParameter("fecha2", fecha2) :
+                new ObjectParameter("fecha2", typeof(System.DateTime));
+    
+            var transportistaParameter = transportista.HasValue ?
+                new ObjectParameter("transportista", transportista) :
+                new ObjectParameter("transportista", typeof(int));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<string>("Reporte", fecha1Parameter, fecha2Parameter, transportistaParameter);
         }
     }
 }

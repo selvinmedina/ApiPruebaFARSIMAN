@@ -26,9 +26,11 @@ namespace ApiPruebaFARSIMAN.Models
         public int col_UsuarioCrea { get; set; }
         public System.DateTime col_FechaCrea { get; set; }
         public Nullable<decimal> col_DistanciaSucursal { get; set; }
+        public Nullable<int> suc_Id { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<tbViajesColaborador> tbViajesColaborador { get; set; }
+        public virtual tbSucursales tbSucursales { get; set; }
         public virtual tbUsuarios tbUsuarios { get; set; }
     }
 }

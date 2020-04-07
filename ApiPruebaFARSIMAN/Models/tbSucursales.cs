@@ -14,11 +14,19 @@ namespace ApiPruebaFARSIMAN.Models
     
     public partial class tbSucursales
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
+        public tbSucursales()
+        {
+            this.tbColaboradores = new HashSet<tbColaboradores>();
+        }
+    
         public int suc_Id { get; set; }
         public string suc_Nombre { get; set; }
         public int suc_UsuarioCrea { get; set; }
         public System.DateTime suc_FechaCrea { get; set; }
     
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<tbColaboradores> tbColaboradores { get; set; }
         public virtual tbUsuarios tbUsuarios { get; set; }
     }
 }

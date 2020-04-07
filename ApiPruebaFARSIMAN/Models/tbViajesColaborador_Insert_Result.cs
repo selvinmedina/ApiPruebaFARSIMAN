@@ -11,11 +11,9 @@ namespace ApiPruebaFARSIMAN.Models
 {
     using System;
     
-    public partial class Reporte_Result
+    public partial class tbViajesColaborador_Insert_Result
     {
-        public int Id { get; set; }
-        public string NombreColaborador { get; set; }
-        public Nullable<decimal> Distancia { get; set; }
-        public Nullable<decimal> TotalPorColaborador { get; set; }
+        public Nullable<int> Id { get; set; }
+        public string MensajeError { get; set; }
     }
 }

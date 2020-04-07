@@ -15,6 +15,7 @@
           <Property Name="col_UsuarioCrea" Type="int" Nullable="false" />
           <Property Name="col_FechaCrea" Type="datetime" Nullable="false" />
           <Property Name="col_DistanciaSucursal" Type="decimal" Precision="10" Scale="2" />
+          <Property Name="suc_Id" Type="int" />
         </EntityType>
         <EntityType Name="tbPrecioKilometro">
           <Key>
@@ -42,6 +43,7 @@
           <Property Name="trans_Apellido" Type="nvarchar" MaxLength="50" />
           <Property Name="trans_UsuarioCrea" Type="int" Nullable="false" />
           <Property Name="trans_FechaCrea" Type="datetime" Nullable="false" />
+          <Property Name="trans_CantidadPorKilometro" Type="decimal" Precision="18" Scale="2" />
         </EntityType>
         <EntityType Name="tbUsuarios">
           <Key>
@@ -74,6 +76,18 @@
             </Principal>
             <Dependent Role="tbViajesColaborador">
               <PropertyRef Name="col_Id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_tbSucursales_tbColaboradores_suc_Id">
+          <End Role="tbSucursales" Type="Self.tbSucursales" Multiplicity="0..1" />
+          <End Role="tbColaboradores" Type="Self.tbColaboradores" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tbSucursales">
+              <PropertyRef Name="suc_Id" />
+            </Principal>
+            <Dependent Role="tbColaboradores">
+              <PropertyRef Name="suc_Id" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -144,8 +158,13 @@
         <Function Name="Reporte" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
           <Parameter Name="fecha1" Type="datetime" Mode="In" />
           <Parameter Name="fecha2" Type="datetime" Mode="In" />
-          <Parameter Name="precioKilometro" Type="decimal" Mode="In" />
           <Parameter Name="transportista" Type="int" Mode="In" />
+        </Function>
+        <Function Name="tbViajesColaborador_Insert" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="trans_Id" Type="int" Mode="In" />
+          <Parameter Name="col_Id" Type="int" Mode="In" />
+          <Parameter Name="fecha" Type="datetime" Mode="In" />
+          <Parameter Name="viaj_UsuarioCrea" Type="int" Mode="In" />
         </Function>
         <EntityContainer Name="PruebaFARSIMANModelStoreContainer">
           <EntitySet Name="tbColaboradores" EntityType="Self.tbColaboradores" Schema="dbo" store:Type="Tables" />
@@ -157,6 +176,10 @@
           <AssociationSet Name="FK_tbColaboradores_tbViajesColaborador_col_Id" Association="Self.FK_tbColaboradores_tbViajesColaborador_col_Id">
             <End Role="tbColaboradores" EntitySet="tbColaboradores" />
             <End Role="tbViajesColaborador" EntitySet="tbViajesColaborador" />
+          </AssociationSet>
+          <AssociationSet Name="FK_tbSucursales_tbColaboradores_suc_Id" Association="Self.FK_tbSucursales_tbColaboradores_suc_Id">
+            <End Role="tbSucursales" EntitySet="tbSucursales" />
+            <End Role="tbColaboradores" EntitySet="tbColaboradores" />
           </AssociationSet>
           <AssociationSet Name="FK_tbTransportistas_tbViajesColaborador_trans_Id" Association="Self.FK_tbTransportistas_tbViajesColaborador_trans_Id">
             <End Role="tbTransportistas" EntitySet="tbTransportistas" />
@@ -183,19 +206,6 @@
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="PruebaFARSIMANModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
-        <EntityType Name="tbColaboradores">
-          <Key>
-            <PropertyRef Name="col_Id" />
-          </Key>
-          <Property Name="col_Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="col_Nombre" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
-          <Property Name="col_Apellido" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
-          <Property Name="col_UsuarioCrea" Type="Int32" Nullable="false" />
-          <Property Name="col_FechaCrea" Type="DateTime" Nullable="false" Precision="3" />
-          <Property Name="col_DistanciaSucursal" Type="Decimal" Precision="10" Scale="2" />
-          <NavigationProperty Name="tbViajesColaborador" Relationship="Self.FK_tbColaboradores_tbViajesColaborador_col_Id" FromRole="tbColaboradores" ToRole="tbViajesColaborador" />
-          <NavigationProperty Name="tbUsuarios" Relationship="Self.FK_tbUsuarios_tbColaboradores_col_UsuarioCrea" FromRole="tbColaboradores" ToRole="tbUsuarios" />
-        </EntityType>
         <EntityType Name="tbPrecioKilometro">
           <Key>
             <PropertyRef Name="pkm_id" />
@@ -212,7 +222,8 @@
           <Property Name="suc_Nombre" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
           <Property Name="suc_UsuarioCrea" Type="Int32" Nullable="false" />
           <Property Name="suc_FechaCrea" Type="DateTime" Nullable="false" Precision="3" />
-          <NavigationProperty Name="tbUsuarios" Relationship="Self.FK_tbUsuarios_tbSucursales_suc_UsuarioCrea" FromRole="tbSucursales" ToRole="tbUsuarios" />
+          <NavigationProperty Name="tbColaboradores" Relationship="PruebaFARSIMANModel.FK_tbSucursales_tbColaboradores_suc_Id" FromRole="tbSucursales" ToRole="tbColaboradores" />
+          <NavigationProperty Name="tbUsuarios" Relationship="PruebaFARSIMANModel.FK_tbUsuarios_tbSucursales_suc_UsuarioCrea" FromRole="tbSucursales" ToRole="tbUsuarios" />
         </EntityType>
         <EntityType Name="tbTransportistas">
           <Key>
@@ -224,23 +235,8 @@
           <Property Name="trans_UsuarioCrea" Type="Int32" Nullable="false" />
           <Property Name="trans_FechaCrea" Type="DateTime" Nullable="false" Precision="3" />
           <NavigationProperty Name="tbViajesColaborador" Relationship="Self.FK_tbTransportistas_tbViajesColaborador_trans_Id" FromRole="tbTransportistas" ToRole="tbViajesColaborador" />
-          <NavigationProperty Name="tbUsuarios" Relationship="Self.FK_tbUsuarios_tbTransportistas_trans_UsuarioCrea" FromRole="tbTransportistas" ToRole="tbUsuarios" />
-        </EntityType>
-        <EntityType Name="tbUsuarios">
-          <Key>
-            <PropertyRef Name="usu_Id" />
-          </Key>
-          <Property Name="usu_Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="usu_NombreUsuario" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
-          <Property Name="usu_ApellidoUsuario" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
-          <Property Name="usu_FechaCrea" Type="DateTime" Precision="3" />
-          <Property Name="usu_FechaModifica" Type="DateTime" Precision="3" />
-          <NavigationProperty Name="tbColaboradores" Relationship="Self.FK_tbUsuarios_tbColaboradores_col_UsuarioCrea" FromRole="tbUsuarios" ToRole="tbColaboradores" />
-          <NavigationProperty Name="tbSucursales" Relationship="Self.FK_tbUsuarios_tbSucursales_suc_UsuarioCrea" FromRole="tbUsuarios" ToRole="tbSucursales" />
-          <NavigationProperty Name="tbTransportistas" Relationship="Self.FK_tbUsuarios_tbTransportistas_trans_UsuarioCrea" FromRole="tbUsuarios" ToRole="tbTransportistas" />
-          <NavigationProperty Name="tbViajesColaborador" Relationship="Self.FK_tbUsuarios_tbViajesColaborador_viaj_UsuarioCrea" FromRole="tbUsuarios" ToRole="tbViajesColaborador" />
-          <Property Name="usu_Password" Type="Binary" MaxLength="64" FixedLength="false" />
-          <Property Name="usu_NombreUsuarioLogin" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="tbUsuarios" Relationship="PruebaFARSIMANModel.FK_tbUsuarios_tbTransportistas_trans_UsuarioCrea" FromRole="tbTransportistas" ToRole="tbUsuarios" />
+          <Property Name="trans_CantidadPorKilometro" Type="Decimal" Precision="18" Scale="2" />
         </EntityType>
         <EntityType Name="tbViajesColaborador">
           <Key>
@@ -251,46 +247,10 @@
           <Property Name="col_Id" Type="Int32" Nullable="false" />
           <Property Name="viaj_Fecha" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="viaj_UsuarioCrea" Type="Int32" Nullable="false" />
-          <NavigationProperty Name="tbColaboradores" Relationship="Self.FK_tbColaboradores_tbViajesColaborador_col_Id" FromRole="tbViajesColaborador" ToRole="tbColaboradores" />
           <NavigationProperty Name="tbTransportistas" Relationship="Self.FK_tbTransportistas_tbViajesColaborador_trans_Id" FromRole="tbViajesColaborador" ToRole="tbTransportistas" />
-          <NavigationProperty Name="tbUsuarios" Relationship="Self.FK_tbUsuarios_tbViajesColaborador_viaj_UsuarioCrea" FromRole="tbViajesColaborador" ToRole="tbUsuarios" />
+          <NavigationProperty Name="tbColaboradores" Relationship="PruebaFARSIMANModel.FK_tbColaboradores_tbViajesColaborador_col_Id" FromRole="tbViajesColaborador" ToRole="tbColaboradores" />
+          <NavigationProperty Name="tbUsuarios" Relationship="PruebaFARSIMANModel.FK_tbUsuarios_tbViajesColaborador_viaj_UsuarioCrea" FromRole="tbViajesColaborador" ToRole="tbUsuarios" />
         </EntityType>
-        <Association Name="FK_tbColaboradores_tbViajesColaborador_col_Id">
-          <End Role="tbColaboradores" Type="Self.tbColaboradores" Multiplicity="1" />
-          <End Role="tbViajesColaborador" Type="Self.tbViajesColaborador" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="tbColaboradores">
-              <PropertyRef Name="col_Id" />
-            </Principal>
-            <Dependent Role="tbViajesColaborador">
-              <PropertyRef Name="col_Id" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_tbUsuarios_tbColaboradores_col_UsuarioCrea">
-          <End Role="tbUsuarios" Type="Self.tbUsuarios" Multiplicity="1" />
-          <End Role="tbColaboradores" Type="Self.tbColaboradores" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="tbUsuarios">
-              <PropertyRef Name="usu_Id" />
-            </Principal>
-            <Dependent Role="tbColaboradores">
-              <PropertyRef Name="col_UsuarioCrea" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_tbUsuarios_tbSucursales_suc_UsuarioCrea">
-          <End Role="tbUsuarios" Type="Self.tbUsuarios" Multiplicity="1" />
-          <End Role="tbSucursales" Type="Self.tbSucursales" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="tbUsuarios">
-              <PropertyRef Name="usu_Id" />
-            </Principal>
-            <Dependent Role="tbSucursales">
-              <PropertyRef Name="suc_UsuarioCrea" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="FK_tbTransportistas_tbViajesColaborador_trans_Id">
           <End Role="tbTransportistas" Type="Self.tbTransportistas" Multiplicity="1" />
           <End Role="tbViajesColaborador" Type="Self.tbViajesColaborador" Multiplicity="*" />
@@ -303,9 +263,143 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <EntityContainer Name="PruebaFARSIMANEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="tbPrecioKilometro" EntityType="Self.tbPrecioKilometro" />
+          <EntitySet Name="tbSucursales" EntityType="Self.tbSucursales" />
+          <EntitySet Name="tbTransportistas" EntityType="Self.tbTransportistas" />
+          <EntitySet Name="tbViajesColaborador" EntityType="Self.tbViajesColaborador" />
+          <AssociationSet Name="FK_tbTransportistas_tbViajesColaborador_trans_Id" Association="Self.FK_tbTransportistas_tbViajesColaborador_trans_Id">
+            <End Role="tbTransportistas" EntitySet="tbTransportistas" />
+            <End Role="tbViajesColaborador" EntitySet="tbViajesColaborador" />
+          </AssociationSet>
+          <FunctionImport Name="Login" ReturnType="Collection(PruebaFARSIMANModel.Login_Result)">
+            <Parameter Name="usuario" Mode="In" Type="String" />
+            <Parameter Name="password" Mode="In" Type="String" />
+          </FunctionImport>
+          <EntitySet Name="tbColaboradores" EntityType="PruebaFARSIMANModel.tbColaboradores" />
+          <EntitySet Name="tbUsuarios" EntityType="PruebaFARSIMANModel.tbUsuarios" />
+          <AssociationSet Name="FK_tbColaboradores_tbViajesColaborador_col_Id" Association="PruebaFARSIMANModel.FK_tbColaboradores_tbViajesColaborador_col_Id">
+            <End Role="tbColaboradores" EntitySet="tbColaboradores" />
+            <End Role="tbViajesColaborador" EntitySet="tbViajesColaborador" />
+          </AssociationSet>
+          <AssociationSet Name="FK_tbSucursales_tbColaboradores_suc_Id" Association="PruebaFARSIMANModel.FK_tbSucursales_tbColaboradores_suc_Id">
+            <End Role="tbSucursales" EntitySet="tbSucursales" />
+            <End Role="tbColaboradores" EntitySet="tbColaboradores" />
+          </AssociationSet>
+          <AssociationSet Name="FK_tbUsuarios_tbColaboradores_col_UsuarioCrea" Association="PruebaFARSIMANModel.FK_tbUsuarios_tbColaboradores_col_UsuarioCrea">
+            <End Role="tbUsuarios" EntitySet="tbUsuarios" />
+            <End Role="tbColaboradores" EntitySet="tbColaboradores" />
+          </AssociationSet>
+          <AssociationSet Name="FK_tbUsuarios_tbSucursales_suc_UsuarioCrea" Association="PruebaFARSIMANModel.FK_tbUsuarios_tbSucursales_suc_UsuarioCrea">
+            <End Role="tbUsuarios" EntitySet="tbUsuarios" />
+            <End Role="tbSucursales" EntitySet="tbSucursales" />
+          </AssociationSet>
+          <AssociationSet Name="FK_tbUsuarios_tbTransportistas_trans_UsuarioCrea" Association="PruebaFARSIMANModel.FK_tbUsuarios_tbTransportistas_trans_UsuarioCrea">
+            <End Role="tbUsuarios" EntitySet="tbUsuarios" />
+            <End Role="tbTransportistas" EntitySet="tbTransportistas" />
+          </AssociationSet>
+          <AssociationSet Name="FK_tbUsuarios_tbViajesColaborador_viaj_UsuarioCrea" Association="PruebaFARSIMANModel.FK_tbUsuarios_tbViajesColaborador_viaj_UsuarioCrea">
+            <End Role="tbUsuarios" EntitySet="tbUsuarios" />
+            <End Role="tbViajesColaborador" EntitySet="tbViajesColaborador" />
+          </AssociationSet>
+          <FunctionImport Name="tbViajesColaborador_Insert" ReturnType="Collection(PruebaFARSIMANModel.tbViajesColaborador_Insert_Result)">
+            <Parameter Name="trans_Id" Mode="In" Type="Int32" />
+            <Parameter Name="col_Id" Mode="In" Type="Int32" />
+            <Parameter Name="fecha" Mode="In" Type="DateTime" />
+            <Parameter Name="viaj_UsuarioCrea" Mode="In" Type="Int32" />
+          </FunctionImport>
+          <FunctionImport Name="Reporte" ReturnType="Collection(String)">
+            <Parameter Name="fecha1" Mode="In" Type="DateTime" />
+            <Parameter Name="fecha2" Mode="In" Type="DateTime" />
+            <Parameter Name="transportista" Mode="In" Type="Int32" />
+          </FunctionImport>
+        </EntityContainer>
+        <ComplexType Name="Login_Result">
+          <Property Type="Int32" Name="usu_Id" Nullable="false" />
+          <Property Type="String" Name="usu_NombreUsuario" Nullable="true" MaxLength="50" />
+        </ComplexType>
+        <EntityType Name="tbColaboradores">
+          <Key>
+            <PropertyRef Name="col_Id" />
+          </Key>
+          <Property Name="col_Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="col_Nombre" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="col_Apellido" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="col_UsuarioCrea" Type="Int32" Nullable="false" />
+          <Property Name="col_FechaCrea" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="col_DistanciaSucursal" Type="Decimal" Precision="10" Scale="2" />
+          <Property Name="suc_Id" Type="Int32" />
+          <NavigationProperty Name="tbViajesColaborador" Relationship="PruebaFARSIMANModel.FK_tbColaboradores_tbViajesColaborador_col_Id" FromRole="tbColaboradores" ToRole="tbViajesColaborador" />
+          <NavigationProperty Name="tbSucursales" Relationship="PruebaFARSIMANModel.FK_tbSucursales_tbColaboradores_suc_Id" FromRole="tbColaboradores" ToRole="tbSucursales" />
+          <NavigationProperty Name="tbUsuarios" Relationship="PruebaFARSIMANModel.FK_tbUsuarios_tbColaboradores_col_UsuarioCrea" FromRole="tbColaboradores" ToRole="tbUsuarios" />
+        </EntityType>
+        <EntityType Name="tbUsuarios">
+          <Key>
+            <PropertyRef Name="usu_Id" />
+          </Key>
+          <Property Name="usu_Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="usu_NombreUsuario" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="usu_ApellidoUsuario" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="usu_FechaCrea" Type="DateTime" Precision="3" />
+          <Property Name="usu_FechaModifica" Type="DateTime" Precision="3" />
+          <Property Name="usu_Password" Type="Binary" MaxLength="64" FixedLength="false" />
+          <Property Name="usu_NombreUsuarioLogin" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="tbColaboradores" Relationship="PruebaFARSIMANModel.FK_tbUsuarios_tbColaboradores_col_UsuarioCrea" FromRole="tbUsuarios" ToRole="tbColaboradores" />
+          <NavigationProperty Name="tbSucursales" Relationship="PruebaFARSIMANModel.FK_tbUsuarios_tbSucursales_suc_UsuarioCrea" FromRole="tbUsuarios" ToRole="tbSucursales" />
+          <NavigationProperty Name="tbTransportistas" Relationship="PruebaFARSIMANModel.FK_tbUsuarios_tbTransportistas_trans_UsuarioCrea" FromRole="tbUsuarios" ToRole="tbTransportistas" />
+          <NavigationProperty Name="tbViajesColaborador" Relationship="PruebaFARSIMANModel.FK_tbUsuarios_tbViajesColaborador_viaj_UsuarioCrea" FromRole="tbUsuarios" ToRole="tbViajesColaborador" />
+        </EntityType>
+        <Association Name="FK_tbColaboradores_tbViajesColaborador_col_Id">
+          <End Type="PruebaFARSIMANModel.tbColaboradores" Role="tbColaboradores" Multiplicity="1" />
+          <End Type="PruebaFARSIMANModel.tbViajesColaborador" Role="tbViajesColaborador" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tbColaboradores">
+              <PropertyRef Name="col_Id" />
+            </Principal>
+            <Dependent Role="tbViajesColaborador">
+              <PropertyRef Name="col_Id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_tbSucursales_tbColaboradores_suc_Id">
+          <End Type="PruebaFARSIMANModel.tbSucursales" Role="tbSucursales" Multiplicity="0..1" />
+          <End Type="PruebaFARSIMANModel.tbColaboradores" Role="tbColaboradores" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tbSucursales">
+              <PropertyRef Name="suc_Id" />
+            </Principal>
+            <Dependent Role="tbColaboradores">
+              <PropertyRef Name="suc_Id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_tbUsuarios_tbColaboradores_col_UsuarioCrea">
+          <End Type="PruebaFARSIMANModel.tbUsuarios" Role="tbUsuarios" Multiplicity="1" />
+          <End Type="PruebaFARSIMANModel.tbColaboradores" Role="tbColaboradores" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tbUsuarios">
+              <PropertyRef Name="usu_Id" />
+            </Principal>
+            <Dependent Role="tbColaboradores">
+              <PropertyRef Name="col_UsuarioCrea" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_tbUsuarios_tbSucursales_suc_UsuarioCrea">
+          <End Type="PruebaFARSIMANModel.tbUsuarios" Role="tbUsuarios" Multiplicity="1" />
+          <End Type="PruebaFARSIMANModel.tbSucursales" Role="tbSucursales" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tbUsuarios">
+              <PropertyRef Name="usu_Id" />
+            </Principal>
+            <Dependent Role="tbSucursales">
+              <PropertyRef Name="suc_UsuarioCrea" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK_tbUsuarios_tbTransportistas_trans_UsuarioCrea">
-          <End Role="tbUsuarios" Type="Self.tbUsuarios" Multiplicity="1" />
-          <End Role="tbTransportistas" Type="Self.tbTransportistas" Multiplicity="*" />
+          <End Type="PruebaFARSIMANModel.tbUsuarios" Role="tbUsuarios" Multiplicity="1" />
+          <End Type="PruebaFARSIMANModel.tbTransportistas" Role="tbTransportistas" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="tbUsuarios">
               <PropertyRef Name="usu_Id" />
@@ -316,8 +410,8 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="FK_tbUsuarios_tbViajesColaborador_viaj_UsuarioCrea">
-          <End Role="tbUsuarios" Type="Self.tbUsuarios" Multiplicity="1" />
-          <End Role="tbViajesColaborador" Type="Self.tbViajesColaborador" Multiplicity="*" />
+          <End Type="PruebaFARSIMANModel.tbUsuarios" Role="tbUsuarios" Multiplicity="1" />
+          <End Type="PruebaFARSIMANModel.tbViajesColaborador" Role="tbViajesColaborador" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="tbUsuarios">
               <PropertyRef Name="usu_Id" />
@@ -327,57 +421,9 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <EntityContainer Name="PruebaFARSIMANEntities" annotation:LazyLoadingEnabled="true">
-          <EntitySet Name="tbColaboradores" EntityType="Self.tbColaboradores" />
-          <EntitySet Name="tbPrecioKilometro" EntityType="Self.tbPrecioKilometro" />
-          <EntitySet Name="tbSucursales" EntityType="Self.tbSucursales" />
-          <EntitySet Name="tbTransportistas" EntityType="Self.tbTransportistas" />
-          <EntitySet Name="tbUsuarios" EntityType="Self.tbUsuarios" />
-          <EntitySet Name="tbViajesColaborador" EntityType="Self.tbViajesColaborador" />
-          <AssociationSet Name="FK_tbColaboradores_tbViajesColaborador_col_Id" Association="Self.FK_tbColaboradores_tbViajesColaborador_col_Id">
-            <End Role="tbColaboradores" EntitySet="tbColaboradores" />
-            <End Role="tbViajesColaborador" EntitySet="tbViajesColaborador" />
-          </AssociationSet>
-          <AssociationSet Name="FK_tbUsuarios_tbColaboradores_col_UsuarioCrea" Association="Self.FK_tbUsuarios_tbColaboradores_col_UsuarioCrea">
-            <End Role="tbUsuarios" EntitySet="tbUsuarios" />
-            <End Role="tbColaboradores" EntitySet="tbColaboradores" />
-          </AssociationSet>
-          <AssociationSet Name="FK_tbUsuarios_tbSucursales_suc_UsuarioCrea" Association="Self.FK_tbUsuarios_tbSucursales_suc_UsuarioCrea">
-            <End Role="tbUsuarios" EntitySet="tbUsuarios" />
-            <End Role="tbSucursales" EntitySet="tbSucursales" />
-          </AssociationSet>
-          <AssociationSet Name="FK_tbTransportistas_tbViajesColaborador_trans_Id" Association="Self.FK_tbTransportistas_tbViajesColaborador_trans_Id">
-            <End Role="tbTransportistas" EntitySet="tbTransportistas" />
-            <End Role="tbViajesColaborador" EntitySet="tbViajesColaborador" />
-          </AssociationSet>
-          <AssociationSet Name="FK_tbUsuarios_tbTransportistas_trans_UsuarioCrea" Association="Self.FK_tbUsuarios_tbTransportistas_trans_UsuarioCrea">
-            <End Role="tbUsuarios" EntitySet="tbUsuarios" />
-            <End Role="tbTransportistas" EntitySet="tbTransportistas" />
-          </AssociationSet>
-          <AssociationSet Name="FK_tbUsuarios_tbViajesColaborador_viaj_UsuarioCrea" Association="Self.FK_tbUsuarios_tbViajesColaborador_viaj_UsuarioCrea">
-            <End Role="tbUsuarios" EntitySet="tbUsuarios" />
-            <End Role="tbViajesColaborador" EntitySet="tbViajesColaborador" />
-          </AssociationSet>
-          <FunctionImport Name="Reporte" ReturnType="Collection(PruebaFARSIMANModel.Reporte_Result)">
-            <Parameter Name="fecha1" Mode="In" Type="DateTime" />
-            <Parameter Name="fecha2" Mode="In" Type="DateTime" />
-            <Parameter Name="precioKilometro" Mode="In" Type="Decimal" />
-            <Parameter Name="transportista" Mode="In" Type="Int32" />
-          </FunctionImport>
-          <FunctionImport Name="Login" ReturnType="Collection(PruebaFARSIMANModel.Login_Result)">
-            <Parameter Name="usuario" Mode="In" Type="String" />
-            <Parameter Name="password" Mode="In" Type="String" />
-          </FunctionImport>
-        </EntityContainer>
-        <ComplexType Name="Reporte_Result">
-          <Property Type="Int32" Name="Id" Nullable="false" />
-          <Property Type="String" Name="NombreColaborador" Nullable="true" MaxLength="101" />
-          <Property Type="Decimal" Name="Distancia" Nullable="true" Precision="10" Scale="2" />
-          <Property Type="Decimal" Name="TotalPorColaborador" Nullable="true" Precision="14" Scale="2" />
-        </ComplexType>
-        <ComplexType Name="Login_Result">
-          <Property Type="Int32" Name="usu_Id" Nullable="false" />
-          <Property Type="String" Name="usu_NombreUsuario" Nullable="true" MaxLength="50" />
+        <ComplexType Name="tbViajesColaborador_Insert_Result">
+          <Property Type="Int32" Name="Id" Nullable="true" />
+          <Property Type="String" Name="MensajeError" Nullable="false" MaxLength="1" />
         </ComplexType>
       </Schema>
     </edmx:ConceptualModels>
@@ -385,18 +431,6 @@
     <edmx:Mappings>
       <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
         <EntityContainerMapping StorageEntityContainer="PruebaFARSIMANModelStoreContainer" CdmEntityContainer="PruebaFARSIMANEntities">
-          <EntitySetMapping Name="tbColaboradores">
-            <EntityTypeMapping TypeName="PruebaFARSIMANModel.tbColaboradores">
-              <MappingFragment StoreEntitySet="tbColaboradores">
-                <ScalarProperty Name="col_Id" ColumnName="col_Id" />
-                <ScalarProperty Name="col_Nombre" ColumnName="col_Nombre" />
-                <ScalarProperty Name="col_Apellido" ColumnName="col_Apellido" />
-                <ScalarProperty Name="col_UsuarioCrea" ColumnName="col_UsuarioCrea" />
-                <ScalarProperty Name="col_FechaCrea" ColumnName="col_FechaCrea" />
-                <ScalarProperty Name="col_DistanciaSucursal" ColumnName="col_DistanciaSucursal" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="tbPrecioKilometro">
             <EntityTypeMapping TypeName="PruebaFARSIMANModel.tbPrecioKilometro">
               <MappingFragment StoreEntitySet="tbPrecioKilometro">
@@ -419,24 +453,12 @@
           <EntitySetMapping Name="tbTransportistas">
             <EntityTypeMapping TypeName="PruebaFARSIMANModel.tbTransportistas">
               <MappingFragment StoreEntitySet="tbTransportistas">
+                <ScalarProperty Name="trans_CantidadPorKilometro" ColumnName="trans_CantidadPorKilometro" />
                 <ScalarProperty Name="trans_Id" ColumnName="trans_Id" />
                 <ScalarProperty Name="trans_Nombre" ColumnName="trans_Nombre" />
                 <ScalarProperty Name="trans_Apellido" ColumnName="trans_Apellido" />
                 <ScalarProperty Name="trans_UsuarioCrea" ColumnName="trans_UsuarioCrea" />
                 <ScalarProperty Name="trans_FechaCrea" ColumnName="trans_FechaCrea" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="tbUsuarios">
-            <EntityTypeMapping TypeName="PruebaFARSIMANModel.tbUsuarios">
-              <MappingFragment StoreEntitySet="tbUsuarios">
-                <ScalarProperty Name="usu_NombreUsuarioLogin" ColumnName="usu_NombreUsuarioLogin" />
-                <ScalarProperty Name="usu_Password" ColumnName="usu_Password" />
-                <ScalarProperty Name="usu_Id" ColumnName="usu_Id" />
-                <ScalarProperty Name="usu_NombreUsuario" ColumnName="usu_NombreUsuario" />
-                <ScalarProperty Name="usu_ApellidoUsuario" ColumnName="usu_ApellidoUsuario" />
-                <ScalarProperty Name="usu_FechaCrea" ColumnName="usu_FechaCrea" />
-                <ScalarProperty Name="usu_FechaModifica" ColumnName="usu_FechaModifica" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -451,16 +473,6 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <FunctionImportMapping FunctionImportName="Reporte" FunctionName="PruebaFARSIMANModel.Store.Reporte">
-            <ResultMapping>
-              <ComplexTypeMapping TypeName="PruebaFARSIMANModel.Reporte_Result">
-                <ScalarProperty Name="Id" ColumnName="Id" />
-                <ScalarProperty Name="NombreColaborador" ColumnName="NombreColaborador" />
-                <ScalarProperty Name="Distancia" ColumnName="Distancia" />
-                <ScalarProperty Name="TotalPorColaborador" ColumnName="TotalPorColaborador" />
-              </ComplexTypeMapping>
-            </ResultMapping>
-          </FunctionImportMapping>
           <FunctionImportMapping FunctionImportName="Login" FunctionName="PruebaFARSIMANModel.Store.Login">
             <ResultMapping>
               <ComplexTypeMapping TypeName="PruebaFARSIMANModel.Login_Result">
@@ -469,6 +481,41 @@
               </ComplexTypeMapping>
             </ResultMapping>
           </FunctionImportMapping>
+          <EntitySetMapping Name="tbColaboradores">
+            <EntityTypeMapping TypeName="PruebaFARSIMANModel.tbColaboradores">
+              <MappingFragment StoreEntitySet="tbColaboradores">
+                <ScalarProperty Name="suc_Id" ColumnName="suc_Id" />
+                <ScalarProperty Name="col_DistanciaSucursal" ColumnName="col_DistanciaSucursal" />
+                <ScalarProperty Name="col_FechaCrea" ColumnName="col_FechaCrea" />
+                <ScalarProperty Name="col_UsuarioCrea" ColumnName="col_UsuarioCrea" />
+                <ScalarProperty Name="col_Apellido" ColumnName="col_Apellido" />
+                <ScalarProperty Name="col_Nombre" ColumnName="col_Nombre" />
+                <ScalarProperty Name="col_Id" ColumnName="col_Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tbUsuarios">
+            <EntityTypeMapping TypeName="PruebaFARSIMANModel.tbUsuarios">
+              <MappingFragment StoreEntitySet="tbUsuarios">
+                <ScalarProperty Name="usu_NombreUsuarioLogin" ColumnName="usu_NombreUsuarioLogin" />
+                <ScalarProperty Name="usu_Password" ColumnName="usu_Password" />
+                <ScalarProperty Name="usu_FechaModifica" ColumnName="usu_FechaModifica" />
+                <ScalarProperty Name="usu_FechaCrea" ColumnName="usu_FechaCrea" />
+                <ScalarProperty Name="usu_ApellidoUsuario" ColumnName="usu_ApellidoUsuario" />
+                <ScalarProperty Name="usu_NombreUsuario" ColumnName="usu_NombreUsuario" />
+                <ScalarProperty Name="usu_Id" ColumnName="usu_Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <FunctionImportMapping FunctionImportName="tbViajesColaborador_Insert" FunctionName="PruebaFARSIMANModel.Store.tbViajesColaborador_Insert">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="PruebaFARSIMANModel.tbViajesColaborador_Insert_Result">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="MensajeError" ColumnName="MensajeError" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="Reporte" FunctionName="PruebaFARSIMANModel.Store.Reporte" />
         </EntityContainerMapping>
       </Mapping>
     </edmx:Mappings>

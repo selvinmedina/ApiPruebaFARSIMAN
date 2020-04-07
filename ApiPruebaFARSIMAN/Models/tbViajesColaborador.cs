@@ -20,8 +20,8 @@ namespace ApiPruebaFARSIMAN.Models
         public System.DateTime viaj_Fecha { get; set; }
         public int viaj_UsuarioCrea { get; set; }
     
-        public virtual tbColaboradores tbColaboradores { get; set; }
         public virtual tbTransportistas tbTransportistas { get; set; }
+        public virtual tbColaboradores tbColaboradores { get; set; }
         public virtual tbUsuarios tbUsuarios { get; set; }
     }
 }
